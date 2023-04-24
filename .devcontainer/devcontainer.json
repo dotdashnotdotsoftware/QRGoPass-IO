@@ -1,0 +1,26 @@
+{
+  "name": "QRGoPass - Write Lambda",
+  "dockerComposeFile": [
+    // Always first to ensure docker starts from a consistent location
+    "${localWorkspaceFolder}/.devcontainer/docker-compose.yml",
+    // The actual devcontainer
+    "${localWorkspaceFolder}/docker/devcontainer/docker-compose.yml"
+
+  ],
+
+  "remoteUser": "node",
+  "workspaceFolder": "/workspace",
+  "service": "dev-container",
+  "shutdownAction": "stopCompose"
+
+
+
+  /* TODO: Setup extensions
+  "customizations": {
+    "vscode": {
+      "extensions": ["streetsidesoftware.code-spell-checker"]
+    }
+  },
+  "forwardPorts": [3000]
+  */
+}
