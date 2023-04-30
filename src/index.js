@@ -1,6 +1,6 @@
 'use strict';
 
-var AWS = require('aws-sdk');
+const AWS = require('aws-sdk');
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
 function isUUID(str) {
@@ -10,7 +10,7 @@ function isUUID(str) {
 
 const getOneMinuteFromNow = () => Math.floor((Date.now() + 60000) / 1000);
 
-exports.handler = async function(event){
+exports.handler = function(event){
 
 	if(!event) return;
 	if(!isUUID(event.UUID)) return;
@@ -26,7 +26,7 @@ exports.handler = async function(event){
 		TableName : process.env.TABLE_NAME
 	};
 
-	await documentClient.put(params, function(err, data){
+	documentClient.put(params, function(err, data){
 		console.log(JSON.stringify(err));
 		console.log(JSON.stringify(data));
 	});

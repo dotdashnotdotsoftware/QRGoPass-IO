@@ -11,16 +11,15 @@
   "remoteUser": "node",
   "workspaceFolder": "/workspace",
   "service": "dev-container",
-  "shutdownAction": "stopCompose"
+  "shutdownAction": "stopCompose",
 
-
-
-  /* TODO: Setup extensions
   "customizations": {
     "vscode": {
-      "extensions": ["streetsidesoftware.code-spell-checker"]
+      "extensions": ["4ops.terraform"]
     }
-  },
+  }
+
+  /* TODO: Setup extensions,
   "forwardPorts": [3000]
   */
 }
