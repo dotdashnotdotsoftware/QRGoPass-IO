@@ -1,50 +1,49 @@
 'use strict';
 
 const AWS = require('aws-sdk');
+const documentClient = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = function(event, context, callback){
-	var params = {
+	const params = {
 		TableName : process.env.TABLE_NAME,
 		Key: {'UUID': event.UUID }
 	};
 
-	var documentClient = new AWS.DynamoDB.DocumentClient();
-
 	documentClient.get(params, function(err, data) {
-	  if (err)
-	  {
-		console.log(err);
-		callback(null, null);
-	  }
-	  else
-	  {
-		var item = data.Item;
-		if("undefined" === typeof(item))
+		if (err)
 		{
+			console.log(err);
 			callback(null, null);
+			return;
 		}
-		else
-		{
-			var toReturn = {};
-			toReturn.UUID = item.UUID;
-			toReturn.V = item.V;
-			toReturn.Data = item.Data;
 
-			var delete_params = {
-				Item : {
-					"UUID" : item.UUID,
-					"V" : 0,
-					"Data" : null,
-					"ttl" : Math.floor((Date.now() + 60000) / 1000)
-				},
-				TableName : process.env.TABLE_NAME
-			};
-			documentClient.put(delete_params, function(err, data){
-				callback(err, data);
-			});
-
-			callback(null, toReturn);
+		if(!data || !data.Item) {
+			callback(null, null);
+			return;
 		}
-	  }
+
+		const item = data.Item;
+		const toReturn = {
+			UUID: item.UUID,
+			V: item.V,
+            Data: item.Data
+		};
+
+		// This really should be just a plain delete...
+		const delete_params = {
+			Item : {
+				"UUID" : item.UUID,
+				"V" : 0,
+				"Data" : null,
+				"ttl" : Math.floor((Date.now() + 60000) / 1000)
+			},
+			TableName : process.env.TABLE_NAME
+		};
+		documentClient.put(delete_params, function(err, data) {
+			console.log(JSON.stringify(err));
+			console.log(JSON.stringify(data));
+		});
+
+		callback(null, toReturn);
 	});
 }
