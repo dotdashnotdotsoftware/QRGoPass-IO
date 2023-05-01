@@ -7,6 +7,22 @@ module "readLegacy" {
   source = "./readLegacy"
 }
 
+module "options" {
+  source = "./options"
+
+  api_id = aws_api_gateway_rest_api.api.id
+  root_resource_id = aws_api_gateway_rest_api.api.root_resource_id
+  response_name = aws_api_gateway_model.empty_response.name
+}
+
+module "get" {
+  source = "./get"
+
+  api_id = aws_api_gateway_rest_api.api.id
+  root_resource_id = aws_api_gateway_rest_api.api.root_resource_id
+  response_name = aws_api_gateway_model.empty_response.name
+}
+
 resource "aws_api_gateway_method" "post" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_rest_api.api.root_resource_id
