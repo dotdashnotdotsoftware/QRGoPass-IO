@@ -1,4 +1,4 @@
-const mockPut = jest.fn().mockReturnValue(2);
+const mockPut = jest.fn();
 jest.mock('aws-sdk', () => {
 	class mockDocumentClient {
         async put(config) {
@@ -25,11 +25,11 @@ describe('handler tests', () => {
 	  jest.clearAllMocks();
 	});
 
-	it('given valid input, it stores a record in dynamodb from the event payload', async () => {
+	it('given valid input, it stores a record in dynamodb from the event payload', () => {
 		const handler = require('./index.js').handler;
 
 		const event = getValidEvent();
-		await handler(event);
+		handler(event);
 
 		expect(mockPut).toHaveBeenCalledTimes(1);
 		expect(mockPut).toHaveBeenCalledWith(expect.objectContaining({
@@ -49,12 +49,12 @@ describe('handler tests', () => {
 		}, expect.anything()));
 	});
 
-	it('given valid input, it stores a record in dynamodb with a TTL of 1 minute', async () => {
+	it('given valid input, it stores a record in dynamodb with a TTL of 1 minute', () => {
 		const handler = require('./index.js').handler;
 
 		const event = getValidEvent();
 		const timeBefore = Math.floor((Date.now() + 60000) / 1000);
-		await handler(event);
+		handler(event);
 		const timeAfter = Math.floor((Date.now() + 60000) / 1000);
 
 		const call = mockPut.mock.calls[0]
