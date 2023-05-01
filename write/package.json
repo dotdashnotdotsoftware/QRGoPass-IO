@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dotdashnotdotsoftware/QRGoPass-WriteLambda.git"
+    "url": "git+https://github.com/dotdashnotdotsoftware/QRGoPass-IO.git"
   },
   "author": "dot-notdot",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/dotdashnotdotsoftware/QRGoPass-WriteLambda/issues"
+    "url": "https://github.com/dotdashnotdotsoftware/QRGoPass-IO/issues"
   },
-  "homepage": "https://github.com/dotdashnotdotsoftware/QRGoPass-WriteLambda#readme",
+  "homepage": "https://github.com/dotdashnotdotsoftware/QRGoPass-IO#readme",
   "dependencies": {
     "aws-sdk": "^2.1363.0",
     "jest": "^29.5.0"
