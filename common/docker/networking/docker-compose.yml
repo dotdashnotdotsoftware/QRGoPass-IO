@@ -1,0 +1,4 @@
+networks:
+  devcontainer-net:
+    name: qrgopass-io-net
+    driver: bridge

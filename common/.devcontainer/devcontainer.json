@@ -4,13 +4,16 @@
     // Always first to ensure docker starts from a consistent location
     "${localWorkspaceFolder}/.devcontainer/docker-compose.yml",
     // The actual devcontainer
-    "${localWorkspaceFolder}/docker/devcontainer/docker-compose.yml"
-
+    "${localWorkspaceFolder}/docker/devcontainer/docker-compose.yml",
+    // Common Network
+    "${localWorkspaceFolder}/docker/networking/docker-compose.yml",
+    // Localstack
+    "${localWorkspaceFolder}/docker/localstack/docker-compose.yml"
   ],
 
   "remoteUser": "node",
   "workspaceFolder": "/workspace/common",
-  "service": "dev-container",
+  "service": "common-dev-container",
   "shutdownAction": "stopCompose",
 
   "customizations": {

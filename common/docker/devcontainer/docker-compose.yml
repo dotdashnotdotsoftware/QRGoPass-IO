@@ -3,7 +3,7 @@ volumes:
   vscode-server-insiders:
 
 services:
-  dev-container:
+  common-dev-container:
     build:
       # All paths are relative to .devcontainer
       context: ../docker/devcontainer
@@ -29,3 +29,5 @@ services:
         read_only: true
       # Permit docker access
       - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - devcontainer-net

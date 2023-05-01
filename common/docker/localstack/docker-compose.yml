@@ -1,0 +1,7 @@
+services:
+  localstack:
+    image: localstack/localstack:2.0.2
+    volumes:
+      - "../docker/localstack/ready.d/:/etc/localstack/init/ready.d/"  # ready hook
+    networks:
+      - devcontainer-net
