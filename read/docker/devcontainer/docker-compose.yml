@@ -15,10 +15,10 @@ services:
       AWS_SECRET_ACCESS_KEY: SECRET_KEY_FOR_LOCALSTACK
     volumes:
       # Mount local repo as delegated for performance gains
-      # But only allow write access to git and the write project
+      # But only allow write access to git and the read project
       - ../../:/workspace:ro
       - ../../.git/:/workspace/.git:delegated
-      - ../../write/:/workspace/write:delegated
+      - ../../read/:/workspace/read:delegated
       # Persist vscode extension directories
       - vscode-server:/home/node/.vscode-server/extensions
       - vscode-server-insiders:/home/node/.vscode-server-insiders/extensions

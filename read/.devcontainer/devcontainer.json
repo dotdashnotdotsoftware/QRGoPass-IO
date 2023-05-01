@@ -1,5 +1,5 @@
 {
-  "name": "QRGoPass - Write Lambda",
+  "name": "QRGoPass - Read Lambda",
   "dockerComposeFile": [
     // Always first to ensure docker starts from a consistent location
     "${localWorkspaceFolder}/.devcontainer/docker-compose.yml",
@@ -9,7 +9,7 @@
   ],
 
   "remoteUser": "node",
-  "workspaceFolder": "/workspace/write",
+  "workspaceFolder": "/workspace/read",
   "service": "dev-container",
   "shutdownAction": "stopCompose",
 
