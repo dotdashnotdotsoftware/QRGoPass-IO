@@ -1,0 +1,31 @@
+volumes:
+  vscode-server:
+  vscode-server-insiders:
+
+services:
+  dev-container:
+    build:
+      # All paths are relative to .devcontainer
+      context: ../docker/devcontainer
+      dockerfile: ./Dockerfile
+      target: devcontainer
+    environment:
+      AWS_DEFAULT_REGION: eu-central-1
+      AWS_ACCESS_KEY_ID: KEY_FOR_LOCALSTACK
+      AWS_SECRET_ACCESS_KEY: SECRET_KEY_FOR_LOCALSTACK
+    volumes:
+      # Mount local repo as delegated for performance gains
+      # But only allow write access to git and the write project
+      - ../../:/workspace:ro
+      - ../../.git/:/workspace/.git:delegated
+      - ../../common/:/workspace/common:delegated
+      # Persist vscode extension directories
+      - vscode-server:/home/node/.vscode-server/extensions
+      - vscode-server-insiders:/home/node/.vscode-server-insiders/extensions
+      # Permit SSH key access for git
+      - type: bind
+        source: ${HOME}/.ssh
+        target: /home/node/.ssh
+        read_only: true
+      # Permit docker access
+      - /var/run/docker.sock:/var/run/docker.sock

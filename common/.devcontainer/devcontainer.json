@@ -1,0 +1,21 @@
+{
+  "name": "QRGoPass - Common IO",
+  "dockerComposeFile": [
+    // Always first to ensure docker starts from a consistent location
+    "${localWorkspaceFolder}/.devcontainer/docker-compose.yml",
+    // The actual devcontainer
+    "${localWorkspaceFolder}/docker/devcontainer/docker-compose.yml"
+
+  ],
+
+  "remoteUser": "node",
+  "workspaceFolder": "/workspace/common",
+  "service": "dev-container",
+  "shutdownAction": "stopCompose",
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["4ops.terraform", "TabNine.tabnine-vscode"]
+    }
+  }
+}
