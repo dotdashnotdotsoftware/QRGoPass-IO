@@ -42,10 +42,10 @@ resource "aws_api_gateway_integration" "post_integration" {
   content_handling        = "CONVERT_TO_TEXT"
   passthrough_behavior    = "WHEN_NO_MATCH"
 
-  uri                     = data.aws_lambda_function.read_lambda.invoke_arn
+  uri                     = data.aws_lambda_function.write_lambda.invoke_arn
 }
 
-data "aws_lambda_function" "read_lambda" {
+data "aws_lambda_function" "write_lambda" {
   function_name = "qrgopass-write-lambda-function"
 }
 
@@ -58,4 +58,16 @@ resource "aws_api_gateway_integration_response" "post_integration_response" {
   response_templates = {
     "application/json" = ""
   }
+}
+
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+resource "aws_lambda_permission" "apigw_lambda" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = data.aws_lambda_function.write_lambda.arn
+  principal     = "apigateway.amazonaws.com"
+
+  # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
+  source_arn = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:${var.api_id}/*/${aws_api_gateway_method.post.http_method}/"
 }
