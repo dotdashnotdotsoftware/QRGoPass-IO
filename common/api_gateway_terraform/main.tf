@@ -3,10 +3,6 @@ resource "aws_api_gateway_rest_api" "api" {
   description = "The API for the app"
 }
 
-module "readLegacy" {
-  source = "./readLegacy"
-}
-
 module "options" {
   source = "./options"
 
