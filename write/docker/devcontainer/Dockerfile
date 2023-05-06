@@ -1,4 +1,4 @@
-FROM node:14.21.0 as devcontainer
+FROM node:18.16.0 as devcontainer
 
 RUN apt-get -yqq update && \
         apt-get -yqq install docker.io less gnupg software-properties-common curl
