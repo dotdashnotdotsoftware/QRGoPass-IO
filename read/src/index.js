@@ -1,56 +1,66 @@
 'use strict';
 
-const { DynamoDBDocument } = require("@aws-sdk/lib-dynamodb");
-const { DynamoDB } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, PutItemCommand, GetItemCommand } = require("@aws-sdk/client-dynamodb");
+const { unmarshall } = require("@aws-sdk/util-dynamodb");
 const config = process.env.IS_LOCAL_RUN ? {
 	endpoint: "http://localstack:4566",
 	region: "us-east-2"
 } : undefined;
-const documentClient = DynamoDBDocument.from(new DynamoDB(config));
 
-exports.handler = function(event, context, callback){
-	const params = {
-		TableName : process.env.TABLE_NAME,
-		Key: {'UUID': event.UUID }
-	};
+const client = new DynamoDBClient(config);
 
-	documentClient.get(params, function(err, data) {
-		if (err)
-		{
-			console.log(err);
-			callback(null, null);
-			return;
-		}
-
-		if(!data || !data.Item) {
-			console.log("Item not found");
-			callback(null, null);
-			return;
-		}
-
-		const item = data.Item;
-		const toReturn = {
-			UUID: item.UUID,
-			V: item.V,
-            Data: item.Data
-		};
-
-		// This really should be just a plain delete...
-		const delete_params = {
-			Item : {
-				"UUID" : item.UUID,
-				"V" : 0,
-				"Data" : null,
-				"ttl" : Math.floor((Date.now() + 60000) / 1000)
+async function getStoredItem(UUID) {
+	try {
+		const command = new GetItemCommand({
+			Key: {
+				UUID: {
+					S: UUID
+				}
 			},
-			TableName : process.env.TABLE_NAME
-		};
-		documentClient.put(delete_params, function(err, data) {
-			console.log("Put callback");
-			console.log(JSON.stringify(err));
-			console.log(JSON.stringify(data));
+			TableName: process.env.TABLE_NAME,
 		});
+		return await client.send(command);
+	} catch(err) {
+		console.error(err);
+		return null;
+	}
+}
 
-		callback(null, toReturn);
-	});
+async function nullifyStoredItem(getResponse) {
+	try {
+		// A PUT and not a DELETE so we can track if the item was already read
+		// I.e. detect if an attacker is trying to read the item at the same time
+		const putCommand = new PutItemCommand({
+			Item: {
+				...getResponse.Item,
+				Data: {
+					NULL: true
+				},
+			},
+			"ReturnConsumedCapacity": "NONE",
+			"TableName": process.env.TABLE_NAME,
+		});
+		await client.send(putCommand);
+	} catch(err) {
+		console.error(err);
+		return false;
+	}
+
+	return true;
+}
+
+exports.handler = async function(event){
+
+	const getResponse = await getStoredItem(event.UUID);
+	if(!getResponse || !getResponse.Item) {
+		console.log("Item not found");
+		return null;
+	}
+
+	const nullifySuccess = nullifyStoredItem(getResponse);
+	if(!nullifySuccess) {
+		return null;
+	}
+
+	return unmarshall(getResponse.Item);
 }

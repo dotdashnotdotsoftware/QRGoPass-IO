@@ -1,22 +1,22 @@
-const mockGetErr = jest.fn();
+const { unmarshall } = require("@aws-sdk/util-dynamodb");
+
 const mockGetData = jest.fn();
 const mockGet = jest.fn();
 const mockPut = jest.fn();
-jest.mock('@aws-sdk/lib-dynamodb', () => {
+jest.mock('@aws-sdk/client-dynamodb', () => {
 	class mockDocumentClient {
-        async get(params, callback) {
-			mockGet(params, callback);
-            return;
-        }
-        async put(params) {
-			mockPut(params);
-            return;
-        }
+		async send(request) {
+			if (request.constructor.name === "GetItemCommand") {
+				return await mockGet(request);
+			} else {
+				return await mockPut(request);
+			}
+		}
     }
     return {
-        DynamoDBDocument: {
-			from: () => new mockDocumentClient(),
-    }};
+		...jest.requireActual('@aws-sdk/client-dynamodb'),
+        DynamoDBClient: mockDocumentClient,
+    };
 });
 
 function getValidEvent() {
@@ -28,9 +28,10 @@ function getValidEvent() {
 function getValidStoredEvent() {
 	return {
 		Item: {
-			UUID: "289d256c-4088-4369-ada0-d00e710b768e",
-			V: "1",
-			Data: "Hello World"
+			Data: { S: "Hello World" },
+			UUID: { S: '5d80ed60-ebee-11ed-a05b-0242ac120003' },
+			ttl: { N: '1683372210' },
+			V: { S: '999' }
 		}
 	}
 }
@@ -39,80 +40,72 @@ describe('handler tests', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		jest.resetAllMocks();
-		mockGetErr.mockReturnValue(undefined);
 		mockGetData.mockReturnValue(getValidStoredEvent());
-		mockGet.mockImplementation((params, callback) => callback(mockGetErr(), mockGetData()));
+		mockGet.mockImplementation(async () => mockGetData());
 	});
 
-	it('returns no data when an error occurs', () => {
+	it('returns no data when an error occurs', async () => {
 		const handler = require('./index.js').handler;
 
-		const mockCallback = jest.fn();
-
-		mockGetErr.mockReturnValue("A test error");
-		mockGetData.mockReturnValue(null);
+		mockGet.mockRejectedValue("A test error");
 
 		const event = getValidEvent();
-		handler(event, null, mockCallback);
+		const result = await handler(event);
 
-		expect(mockCallback).toHaveBeenCalledTimes(1);
-		expect(mockCallback).toHaveBeenCalledWith(null, null);
+		expect(result).toBeNull();
 	});
 
 	it.each([
 		null,
 		undefined,
 		{}
-	])('returns no data when no record is found', (testCase) => {
+	])('returns no data when no record is found', async (testCase) => {
 		const handler = require('./index.js').handler;
-
-		const mockCallback = jest.fn();
 
 		mockGetData.mockReturnValue(testCase);
 
 		const event = getValidEvent();
-		handler(event, null, mockCallback);
+		const result = await handler(event);
 
-		expect(mockCallback).toHaveBeenCalledTimes(1);
-		expect(mockCallback).toHaveBeenCalledWith(null, null);
+		expect(result).toBeNull();
 	});
 
-	it('returns the data it found', () => {
+	it('returns the data it found', async () => {
 		const handler = require('./index.js').handler;
-
-		const mockCallback = jest.fn();
 
 		const storedEvent = getValidStoredEvent();
 		mockGetData.mockReturnValue(storedEvent);
 
-		const event = getValidEvent();
-		handler(event, null, mockCallback);
+		const result = await handler(getValidEvent());
 
-		expect(mockCallback).toHaveBeenCalledTimes(1);
-		expect(mockCallback).toHaveBeenCalledWith(null, {
-			UUID: storedEvent.Item.UUID,
-			V: storedEvent.Item.V,
-            Data: storedEvent.Item.Data
-		});
+		console.log(storedEvent);
+		const expected = unmarshall(storedEvent.Item);
+		expect(result).toEqual(expected);
 	});
 
-	// TODO: refactor this
-	it('"deletes" the data it found', () => {
+	it('"deletes" the data it found so we can detect repeat attacks', async () => {
 		const handler = require('./index.js').handler;
-
-		const mockCallback = jest.fn();
 
 		const storedEvent = getValidStoredEvent();
 		mockGetData.mockReturnValue(storedEvent);
 
-		const event = getValidEvent();
-		handler(event, null, mockCallback);
+		await handler(getValidEvent());
 
 		expect(mockPut).toHaveBeenCalledTimes(1);
-		expect(mockPut).toHaveBeenCalledWith(expect.objectContaining({
-			Item: expect.objectContaining({
-				UUID: storedEvent.Item.UUID
-			})
-		}, expect.anything()));
+		expect(mockPut).toHaveBeenCalledWith(
+			expect.objectContaining(
+				{
+					input: expect.objectContaining(
+						{
+							Item: expect.objectContaining(
+								{
+									UUID: storedEvent.Item.UUID
+								}
+							)
+						}
+					)
+				}
+			)
+		);
 	});
 });
