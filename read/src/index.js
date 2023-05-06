@@ -1,11 +1,12 @@
 'use strict';
 
-const AWS = require('aws-sdk');
+const { DynamoDBDocument } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDB } = require("@aws-sdk/client-dynamodb");
 const config = process.env.IS_LOCAL_RUN ? {
 	endpoint: "http://localstack:4566",
 	region: "us-east-2"
 } : undefined;
-const documentClient = new AWS.DynamoDB.DocumentClient(config);
+const documentClient = DynamoDBDocument.from(new DynamoDB(config));
 
 exports.handler = function(event, context, callback){
 	const params = {

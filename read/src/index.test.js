@@ -2,7 +2,7 @@ const mockGetErr = jest.fn();
 const mockGetData = jest.fn();
 const mockGet = jest.fn();
 const mockPut = jest.fn();
-jest.mock('aws-sdk', () => {
+jest.mock('@aws-sdk/lib-dynamodb', () => {
 	class mockDocumentClient {
         async get(params, callback) {
 			mockGet(params, callback);
@@ -14,8 +14,8 @@ jest.mock('aws-sdk', () => {
         }
     }
     return {
-        DynamoDB: {
-            DocumentClient: mockDocumentClient,
+        DynamoDBDocument: {
+			from: () => new mockDocumentClient(),
     }};
 });
 
