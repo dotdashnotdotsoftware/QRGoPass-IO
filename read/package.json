@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "node ./local_run.js",
     "test": "jest"
   },
   "repository": {

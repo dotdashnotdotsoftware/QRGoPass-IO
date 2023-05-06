@@ -1,7 +1,11 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-const documentClient = new AWS.DynamoDB.DocumentClient();
+const config = process.env.IS_LOCAL_RUN ? {
+	endpoint: "http://localstack:4566",
+	region: "us-east-2"
+} : undefined;
+const documentClient = new AWS.DynamoDB.DocumentClient(config);
 
 exports.handler = function(event, context, callback){
 	const params = {
@@ -18,6 +22,7 @@ exports.handler = function(event, context, callback){
 		}
 
 		if(!data || !data.Item) {
+			console.log("Item not found");
 			callback(null, null);
 			return;
 		}
@@ -40,6 +45,7 @@ exports.handler = function(event, context, callback){
 			TableName : process.env.TABLE_NAME
 		};
 		documentClient.put(delete_params, function(err, data) {
+			console.log("Put callback");
 			console.log(JSON.stringify(err));
 			console.log(JSON.stringify(data));
 		});
