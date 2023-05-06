@@ -1,5 +1,5 @@
 const mockPut = jest.fn();
-jest.mock('aws-sdk', () => {
+jest.mock('@aws-sdk/lib-dynamodb', () => {
 	class mockDocumentClient {
         async put(config) {
 			mockPut(config);
@@ -7,8 +7,8 @@ jest.mock('aws-sdk', () => {
         }
     }
     return {
-        DynamoDB: {
-            DocumentClient: mockDocumentClient,
+        DynamoDBDocument: {
+			from: () => new mockDocumentClient(),
     }};
 });
 
