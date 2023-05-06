@@ -1,7 +1,11 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-const documentClient = new AWS.DynamoDB.DocumentClient();
+const config = process.env.IS_LOCAL_RUN ? {
+	endpoint: "http://localstack:4566",
+	region: "us-east-2"
+} : undefined;
+const documentClient = new AWS.DynamoDB.DocumentClient(config);
 
 function isUUID(str) {
 	const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
@@ -27,6 +31,7 @@ exports.handler = function(event){
 	};
 
 	documentClient.put(params, function(err, data){
+		console.log("Put callback")
 		console.log(JSON.stringify(err));
 		console.log(JSON.stringify(data));
 	});

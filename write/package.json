@@ -2,8 +2,9 @@
   "name": "qrgopass-write-lambda",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
+    "dev": "node ./local_run.js",
     "test": "jest"
   },
   "repository": {
