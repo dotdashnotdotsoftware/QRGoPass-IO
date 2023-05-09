@@ -10,7 +10,7 @@ services:
       dockerfile: ./Dockerfile
       target: devcontainer
     environment:
-      AWS_DEFAULT_REGION: eu-central-1
+      AWS_DEFAULT_REGION: us-east-2
       AWS_ACCESS_KEY_ID: KEY_FOR_LOCALSTACK
       AWS_SECRET_ACCESS_KEY: SECRET_KEY_FOR_LOCALSTACK
     volumes:
