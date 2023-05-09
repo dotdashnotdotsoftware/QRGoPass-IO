@@ -1,15 +1,14 @@
 const mockPut = jest.fn();
-jest.mock('@aws-sdk/lib-dynamodb', () => {
+jest.mock('@aws-sdk/client-dynamodb', () => {
 	class mockDocumentClient {
-        async put(config) {
-			mockPut(config);
-            return;
-        }
+		async send(request) {
+			return await mockPut(request);
+		}
     }
     return {
-        DynamoDBDocument: {
-			from: () => new mockDocumentClient(),
-    }};
+		...jest.requireActual('@aws-sdk/client-dynamodb'),
+        DynamoDBClient: mockDocumentClient,
+    };
 });
 
 function getValidEvent() {
@@ -25,41 +24,47 @@ describe('handler tests', () => {
 	  jest.clearAllMocks();
 	});
 
-	it('given valid input, it stores a record in dynamodb from the event payload', () => {
+	it('given valid input, it stores a record in dynamodb from the event payload', async () => {
 		const handler = require('./index.js').handler;
 
 		const event = getValidEvent();
-		handler(event);
+		await handler(event);
 
 		expect(mockPut).toHaveBeenCalledTimes(1);
 		expect(mockPut).toHaveBeenCalledWith(expect.objectContaining({
-			Item: expect.objectContaining({
-				UUID: event.UUID
+			input: expect.objectContaining({
+				Item: expect.objectContaining({
+					UUID: { S: event.UUID }
+				})
 			})
 		}, expect.anything()));
 		expect(mockPut).toHaveBeenCalledWith(expect.objectContaining({
-			Item: expect.objectContaining({
-				V: event.V
+			input: expect.objectContaining({
+				Item: expect.objectContaining({
+					V: { S: event.V }
+				})
 			})
 		}, expect.anything()));
 		expect(mockPut).toHaveBeenCalledWith(expect.objectContaining({
-			Item: expect.objectContaining({
-				Data: event.Data
+			input: expect.objectContaining({
+				Item: expect.objectContaining({
+					Data: { S: event.Data }
+				})
 			})
 		}, expect.anything()));
 	});
 
-	it('given valid input, it stores a record in dynamodb with a TTL of 1 minute', () => {
+	it('given valid input, it stores a record in dynamodb with a TTL of 1 minute', async () => {
 		const handler = require('./index.js').handler;
 
 		const event = getValidEvent();
 		const timeBefore = Math.floor((Date.now() + 60000) / 1000);
-		handler(event);
+		await handler(event);
 		const timeAfter = Math.floor((Date.now() + 60000) / 1000);
 
 		const call = mockPut.mock.calls[0]
 		const putParams = call[0]
-		const ttl = putParams.Item.ttl;
+		const ttl = Number(putParams.input.Item.ttl.N);
 		expect(ttl).toBeGreaterThanOrEqual(timeBefore);
 		expect(ttl).toBeLessThanOrEqual(timeAfter);
 	});
@@ -67,10 +72,10 @@ describe('handler tests', () => {
 	describe('no input cases', () => {
 		const noInputCases = [undefined, null];
 
-		it.each(noInputCases)('given no input, does not call dynamodb', (testCase) => {
+		it.each(noInputCases)('given no input, does not call dynamodb', async (testCase) => {
 			const handler = require('./index.js').handler;
 
-			handler(testCase);
+			await handler(testCase);
 
 			expect(mockPut).not.toHaveBeenCalled();
 		});
@@ -80,13 +85,13 @@ describe('handler tests', () => {
 		describe('invalid UUID cases', () => {
 			const cases = [undefined, null, "ABC"];
 
-			it.each(cases)('invalid UUID, does not call dynamodb', (testCase) => {
+			it.each(cases)('invalid UUID, does not call dynamodb', async (testCase) => {
 				const handler = require('./index.js').handler;
 				const event = {
 					...getValidEvent(),
 					UUID: testCase
 				}
-				handler(event);
+				await handler(event);
 
 				expect(mockPut).not.toHaveBeenCalled();
 			});
