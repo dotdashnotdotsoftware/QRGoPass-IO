@@ -16,7 +16,7 @@
 
   "customizations": {
     "vscode": {
-      "extensions": ["4ops.terraform", "TabNine.tabnine-vscode", "firsttris.vscode-jest-runner"]
+      "extensions": ["4ops.terraform", "firsttris.vscode-jest-runner"]
     }
   }
 }
