@@ -1,2 +1,23 @@
 version: "3.9"
-# File just needs to exist to ensure a consistent, refactor safe, initial docker directory
+
+services:
+  dev-container:
+    build:
+      # All paths are relative to .devcontainer
+      context: ../docker/devcontainer
+      dockerfile: ./Dockerfile
+      target: devcontainer
+    environment:
+      AWS_DEFAULT_REGION: us-east-2
+      AWS_ACCESS_KEY_ID: KEY_FOR_LOCALSTACK
+      AWS_SECRET_ACCESS_KEY: SECRET_KEY_FOR_LOCALSTACK
+    volumes:
+      # Mount local repo as delegated for performance gains
+      # But only allow write access to git and the write project
+      - ../../:/workspace:ro
+      - ../../.git/:/workspace/.git:delegated
+      - ../../write/:/workspace/write:delegated
+      # Permit docker access
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - devcontainer-net
