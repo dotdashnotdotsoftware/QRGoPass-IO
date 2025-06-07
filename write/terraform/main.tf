@@ -32,7 +32,7 @@ resource "aws_lambda_function" "lambda" {
 
   source_code_hash = data.archive_file.lambda.output_base64sha256
 
-  runtime = "nodejs18.x"
+  runtime = "nodejs${var.major_node_version}.x"
 
   environment {
     variables = {
