@@ -2,11 +2,6 @@ version: "3.9"
 
 services:
   dev-container:
-    build:
-      # All paths are relative to .devcontainer
-      context: ../docker/devcontainer
-      dockerfile: ./Dockerfile
-      target: devcontainer
     environment:
       AWS_DEFAULT_REGION: us-east-2
       AWS_ACCESS_KEY_ID: KEY_FOR_LOCALSTACK

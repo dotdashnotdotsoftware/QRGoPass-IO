@@ -4,7 +4,8 @@
     // Always first to ensure docker starts from a consistent location
     "${localWorkspaceFolder}/.devcontainer/docker-compose.yml",
     // The actual devcontainer
-    "${localWorkspaceFolder}/docker/devcontainer/docker-compose.yml",
+    "${localWorkspaceFolder}/.devcontainer/common/nodejs/docker-compose.yml",
+    "${localWorkspaceFolder}/.devcontainer/common/behaviours/filesystem.yml",
     // Common Network
     "${localWorkspaceFolder}/docker/networking/docker-compose.yml",
     // Localstack
@@ -13,12 +14,15 @@
 
   "remoteUser": "node",
   "workspaceFolder": "/workspace/common",
-  "service": "common-dev-container",
+  "service": "dev-container",
   "shutdownAction": "stopCompose",
 
   "customizations": {
     "vscode": {
-      "extensions": ["4ops.terraform"]
+      "extensions": ["4ops.terraform"],
+      "settings": {
+        "files.enableSymlinks": true
+      }
     }
   }
 }
